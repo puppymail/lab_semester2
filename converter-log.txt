@@ -1,0 +1,34 @@
+[INFO] Input expression: '1 + 2 + 3 * (23.24 / 1.24) - (3 * 3 * 99) + 999.9999999'
+[INFO] Output stack: []
+[INFO] Operators stack: []
+[INFO] Parsing expression...
+[INFO] Operand encountered: '1'
+[INFO] Operator encountered: '+'
+[INFO] Operand encountered: '2'
+[INFO] Operator encountered: '+'
+[INFO] Operand encountered: '3'
+[INFO] Operator encountered: '*'
+[INFO] Operator encountered: '('
+[INFO] Operand encountered: '23.24'
+[INFO] Operator encountered: '/'
+[INFO] Operand encountered: '1.24'
+[INFO] Operator encountered: ')'
+[INFO] Operator encountered: '-'
+[INFO] Operator encountered: '('
+[INFO] Operand encountered: '3'
+[INFO] Operator encountered: '*'
+[INFO] Operand encountered: '3'
+[INFO] Operator encountered: '*'
+[INFO] Operand encountered: '99'
+[INFO] Operator encountered: ')'
+[INFO] Operator encountered: '+'
+[INFO] Operand encountered: '999.9999999'
+[INFO] Expression parsed
+[INFO] Output stack: [999.9999999, -, *, 99, *, 3, 3, +, *, /, 1.24, 23.24, 3, +, 2, 1]
+[INFO] Operators stack: [+]
+[INFO] Moving operations to output stack
+[INFO] Finished moving operands
+[INFO] Output stack: [+, 999.9999999, -, *, 99, *, 3, 3, +, *, /, 1.24, 23.24, 3, +, 2, 1]
+[INFO] Operators stack: []
+[INFO] Reverse polish notation expression: 1 2 + 3 23.24 1.24 / * + 3 3 * 99 * - 999.9999999 +
+[INFO] Done
