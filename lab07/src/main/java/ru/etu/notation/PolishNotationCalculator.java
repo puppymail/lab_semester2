@@ -18,21 +18,21 @@ import java.util.Queue;
 import java.util.regex.Pattern;
 import ru.etu.operation.Operation;
 
-public class ReversePolishNotationCalculator implements INotationCalculator {
+public class PolishNotationCalculator implements INotationCalculator {
 
     private static final String VAR_REGEXP = "[a-zA-Z]+";
 
     private static final Pattern VAR_PATTERN = Pattern.compile(VAR_REGEXP);
 
-    private final Queue<String> stack;
+    private final Queue<String> queue;
 
     private Path file = Paths.get(DEFAULT_FILE_NAME);
 
-    public ReversePolishNotationCalculator() {
-        this.stack = Collections.asLifoQueue(new LinkedList<>());
+    public PolishNotationCalculator() {
+        this.queue = Collections.asLifoQueue(new LinkedList<>());
     }
 
-    public ReversePolishNotationCalculator(String filePath) {
+    public PolishNotationCalculator(String filePath) {
         this();
         this.file = Paths.get(filePath);
     }
@@ -44,7 +44,7 @@ public class ReversePolishNotationCalculator implements INotationCalculator {
 
     @Override
     public Double calculate(String exp, final boolean verbose, final boolean writeToFile, Map<String, Double> variables) {
-        stack.clear();
+        queue.clear();
 
         final boolean hasVariables = nonNull(variables);
 
@@ -72,12 +72,12 @@ public class ReversePolishNotationCalculator implements INotationCalculator {
 
         if (verbose) {
             System.out.println("[INFO] Input string: '" + exp + "'");
-            System.out.println("[INFO] Output stack: " + stack.toString());
+            System.out.println("[INFO] Output queue: " + queue.toString());
             System.out.println("[INFO] Parsing string...");
             if (writeToFile) {
                 try {
                     fileWriter.write("[INFO] Input string: '" + exp + "'" + System.lineSeparator());
-                    fileWriter.write("[INFO] Output stack: " + stack.toString() + System.lineSeparator());
+                    fileWriter.write("[INFO] Output queue: " + queue.toString() + System.lineSeparator());
                     fileWriter.write("[INFO] Parsing string..." + System.lineSeparator());
                 } catch (IOException ioe) {
                     ioe.printStackTrace();
@@ -130,7 +130,7 @@ public class ReversePolishNotationCalculator implements INotationCalculator {
         final StringBuilder token = new StringBuilder();
         int state = 0;
         Character c;
-        for (int i = 0; i < input.length(); /*nop*/) {
+        for (int i = input.length() - 1; i >= 0; /*nop*/) {
             c = input.charAt(i);
             switch (state) {
                 case 0:
@@ -140,7 +140,7 @@ public class ReversePolishNotationCalculator implements INotationCalculator {
                         if (hasVariables) {
                             token.append(variables.get(String.valueOf(c)));
                             pushOperand(token);
-                            ++i;
+                            --i;
                         } else {
                             System.err.println("Variable encountered, but no variables "
                                     + "were provided");
@@ -155,18 +155,18 @@ public class ReversePolishNotationCalculator implements INotationCalculator {
                                 logOperator(c);
                         }
                         pushOperator(c);
-                        ++i;
+                        --i;
                     } else {
-                        ++i;
+                        --i;
                     }
                     break;
                 case 1:
                     if (Character.isDigit(c)) {
                         token.append(c);
-                        ++i;
+                        --i;
                     } else if (c == '.' || c == ',') {
                         token.append('.');
-                        ++i;
+                        --i;
                     } else {
                         if (verbose) {
                             if (writeToFile)
@@ -195,14 +195,14 @@ public class ReversePolishNotationCalculator implements INotationCalculator {
 
         if (verbose) {
             System.out.println("[INFO] Expression parsed");
-            System.out.println("[INFO] Stack: " + stack.toString());
-            System.out.println("[INFO] Result: " + Double.parseDouble(stack.peek()));
+            System.out.println("[INFO] Queue: " + queue.toString());
+            System.out.println("[INFO] Result: " + Double.parseDouble(queue.peek()));
             System.out.println("[INFO] Done");
             if (writeToFile) {
                 try {
                     fileWriter.write("[INFO] Expression parsed" + System.lineSeparator());
-                    fileWriter.write("[INFO] Stack: " + stack.toString() + System.lineSeparator());
-                    fileWriter.write("[INFO] Result: " + Double.parseDouble(stack.peek())
+                    fileWriter.write("[INFO] Queue: " + queue.toString() + System.lineSeparator());
+                    fileWriter.write("[INFO] Result: " + Double.parseDouble(queue.peek())
                             + System.lineSeparator());
                     fileWriter.write("[INFO] Done" + System.lineSeparator());
                 } catch (IOException ioe) {
@@ -221,7 +221,7 @@ public class ReversePolishNotationCalculator implements INotationCalculator {
             }
         }
         
-        return Double.parseDouble(stack.peek());
+        return Double.parseDouble(queue.peek());
     }
     
     private void logOperand(String operand) {
@@ -242,7 +242,7 @@ public class ReversePolishNotationCalculator implements INotationCalculator {
     }
     
     private void pushOperand(StringBuilder token) {
-        stack.offer(requireNonNull(token).toString());
+        queue.offer(requireNonNull(token).toString());
         token.delete(0, token.length());
     }
 
@@ -252,9 +252,9 @@ public class ReversePolishNotationCalculator implements INotationCalculator {
             System.err.println("Couldn't parse operator: '" + operator + "'");
             throw new IllegalArgumentException("No operation for operator '" + operator + "'");
         }
-        Double secondOperand = Double.parseDouble(stack.poll());
-        Double firstOperand = Double.parseDouble(stack.poll());
-        stack.offer(op.operation().calculate(firstOperand, secondOperand).toString());
+        Double firstOperand = Double.parseDouble(queue.poll());
+        Double secondOperand = Double.parseDouble(queue.poll());
+        queue.offer(op.operation().calculate(firstOperand, secondOperand).toString());
     }
 
     private void logOperator(Character operator) {
